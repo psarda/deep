@@ -21,7 +21,7 @@ public class Uncode implements Serializable {
 
   public static void main(String[] args) throws IOException, ClassNotFoundException {
     // out.println(" have you done the setup then enter 1 else 0");
-    File tempFile = new File("c:/temp/temp.txt");
+    File tempFile = new File(filename);
     boolean exists = tempFile.exists();
     if (exists == false) {
       Uncode uncode;
