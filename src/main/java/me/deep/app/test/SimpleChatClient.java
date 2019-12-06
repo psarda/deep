@@ -25,7 +25,7 @@ public class SimpleChatClient {
   Socket sock;
 
   public void go() {
-    JFrame frame = new JFrame("Ludicrously Simple Chat Client");
+    JFrame frame = new JFrame("My Chat App ");
     JPanel mainPanel = new JPanel();
     incoming = new JTextArea(15, 50);
     incoming.setLineWrap(true);
@@ -42,12 +42,11 @@ public class SimpleChatClient {
     mainPanel.add(outgoing);
     mainPanel.add(sendButton);
     frame.getContentPane().add(BorderLayout.CENTER, mainPanel);
-    Thread readerThread = new Thread(new IncomingReader());
-    readerThread.start();
-
+    setUpNetworking();
     frame.setSize(650, 500);
     frame.setVisible(true);
-    setUpNetworking();
+    Thread readerThread = new Thread(new IncomingReader());
+    readerThread.start();
 
   }
 

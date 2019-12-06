@@ -3,13 +3,17 @@ package me.deep.app.test;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.io.Serializable;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-public class VerySimpleChatServer {
+public class VerySimpleChatServer implements Serializable {
+
+  private static final long serialVersionUID = 1L;
   ArrayList clientOutputStreams;
+  static String message;
 
   public class ClientHandler implements Runnable {
     BufferedReader reader;
@@ -27,7 +31,7 @@ public class VerySimpleChatServer {
     }
 
     public void run() {
-      String message;
+
       try {
         while ((message = reader.readLine()) != null) {
           System.out.println("read " + message);
@@ -40,6 +44,7 @@ public class VerySimpleChatServer {
   }
 
   public static void main(String[] args) {
+
     new VerySimpleChatServer().go();
   }
 
@@ -54,11 +59,12 @@ public class VerySimpleChatServer {
 
         Thread t = new Thread(new ClientHandler(clientSocket));
         t.start();
-        System.out.println("got a connection");
+
       }
     } catch (Exception ex) {
       ex.printStackTrace();
     }
+
   }
 
   public void tellEveryone(String message) {
