@@ -19,6 +19,7 @@ import javax.swing.JTextField;
 import javax.swing.ScrollPaneConstants;
 
 public class MyGame implements Serializable {
+
   private static final long serialVersionUID = 1L;
   private static final String FILENAME = "AllMyGames.txt";
   private static String FILENAME1 = ".txt";
@@ -30,6 +31,7 @@ public class MyGame implements Serializable {
   private static Integer FINALWEAPONLEVEL;
   private static String InGameName = " ";
   static String username;
+  static boolean didStoryLine = false;
 
   public MyGame() {
 
@@ -100,7 +102,7 @@ public class MyGame implements Serializable {
     mainPanel.setSize(10000, 10000);
 
     frame.add(mainPanel);
-    frame.setSize(10000, 10000);
+    frame.pack();
     frame.setVisible(true);
     try {
       Thread.sleep(5000);
@@ -159,7 +161,7 @@ public class MyGame implements Serializable {
 
     }
     voice.setText(
-            "<You> Good Morning  Ma'am. There are Rumors running around the camp that Nathan's are coming to Earth. Is it true or is it fake?");
+            "<You> Good Morning  Ma'am. There are Rumors running around the camp that Nathan's are coming to Earth. \n Is it true or is it fake?");
     voice.requestFocus();
     try {
       Thread.sleep(5000);
@@ -173,13 +175,29 @@ public class MyGame implements Serializable {
     } catch (Exception e) {
 
     }
-    voice.setText(continuningSecretarySpeak + "these are very powerful. They can teleport");
+    voice.setText(continuningSecretarySpeak
+            + "These are very powerful. \n They can teleport and change into any object they want");
+    voice.requestFocus();
+    try {
+      Thread.sleep(5000);
+    } catch (Exception e) {
+    }
+    voice.setText(continuningSecretarySpeak + "They can hit you if they are in 2 block radius from you.  ");
     voice.requestFocus();
     try {
       Thread.sleep(5000);
     } catch (Exception e) {
 
     }
+    voice.setText(continuningSecretarySpeak
+            + "I am sending to you they only gun which can kill them. \n You will need to kill 100 of them. ");
+    voice.requestFocus();
+    try {
+      Thread.sleep(10000);
+    } catch (Exception e) {
+
+    }
+    didStoryLine = true;
   }
 
   private static void wave() {

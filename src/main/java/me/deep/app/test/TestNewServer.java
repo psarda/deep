@@ -18,7 +18,6 @@ public class TestNewServer implements Serializable {
 
   private static final long serialVersionUID = 1L;
   private static final String FILENAME = "serverChat.txt";
-  static String allMessages;
   ArrayList clientOutputStreams;
 
   static String message;
@@ -49,12 +48,12 @@ public class TestNewServer implements Serializable {
           System.out.println("read " + message);
           try {
 
-            TestNewServer test = new TestNewServer();
+            SeverStoreAndRetriveData test = new SeverStoreAndRetriveData();
             FileInputStream file = new FileInputStream(FILENAME);
             ObjectInputStream in = new ObjectInputStream(file);
 
             // Method for serialization of object
-            test = (TestNewServer) in.readObject();
+            test = (SeverStoreAndRetriveData) in.readObject();
 
             in.close();
             file.close();
@@ -64,7 +63,7 @@ public class TestNewServer implements Serializable {
 
           }
           try {
-            TestNewServer test1 = new TestNewServer();
+            SeverStoreAndRetriveData test1 = new SeverStoreAndRetriveData();
             test1.allMessages = input + " \n " + message;
             FileOutputStream file1 = new FileOutputStream(FILENAME);
             ObjectOutputStream out = new ObjectOutputStream(file1);
@@ -88,7 +87,7 @@ public class TestNewServer implements Serializable {
   }
 
   public static void main(String[] args) throws IOException {
-    TestNewServer test = new TestNewServer();
+    SeverStoreAndRetriveData test = new SeverStoreAndRetriveData();
     test.allMessages = " ";
     FileOutputStream file = new FileOutputStream(FILENAME);
     ObjectOutputStream out = new ObjectOutputStream(file);
@@ -111,12 +110,12 @@ public class TestNewServer implements Serializable {
 
         Thread t = new Thread(new ClientHandlerTest(clientSocket));
         t.start();
-        TestNewServer test = new TestNewServer();
+        SeverStoreAndRetriveData test = new SeverStoreAndRetriveData();
         FileInputStream file = new FileInputStream(FILENAME);
         ObjectInputStream in = new ObjectInputStream(file);
 
         // Method for serialization of object
-        test = (TestNewServer) in.readObject();
+        test = (SeverStoreAndRetriveData) in.readObject();
 
         in.close();
         file.close();
