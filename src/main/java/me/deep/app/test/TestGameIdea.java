@@ -2,50 +2,49 @@ package me.deep.app.test;
 
 import java.awt.Color;
 import java.awt.Graphics;
-import java.awt.Image;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
 import java.util.ArrayList;
 
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
 import javax.swing.JFrame;
-import javax.swing.JPanel;
 
 public class TestGameIdea extends JFrame implements Runnable {
-  public Camera camera;
-  public Screen screen;
-  public ArrayList<Texture> textures;
 
   private static final long serialVersionUID = 1L;
-  static JFrame gamePart1Window = new JFrame();
-  static JPanel gamePart1Panel = new JPanel();
-
-  private static final String gamePart1ButtonImageDownFileName = "down.png";
-  private static final String gamePart1ButtonImageUpFileName = "up.png";
-  private static final String gamePart1ButtonImageLeftFileName = "left.png";
-  private static final String gamePart1ButtonImageRightFileName = "right.png";
-  private static final String gamePart1MapImageFileName = "map.png";
-
   public int mapWidth = 15;
   public int mapHeight = 15;
+  public int monsterHealth = 100;
+  public boolean monsterAlive = true;
   private Thread thread;
   private boolean running;
-  BufferedImage image;
+  private BufferedImage image;
   public int[] pixels;
-  public static int[][] map = { { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
-          { 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 2, 1, 2, 1 }, { 1, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 1 },
-          { 1, 0, 1, 2, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1 }, { 1, 0, 2, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1, 1, 1 },
-          { 1, 2, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1 }, { 1, 1, 1, 1, 0, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1 },
-          { 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 2, 1 }, { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1 },
-          { 1, 0, 0, 0, 0, 0, 1, 2, 0, 0, 0, 0, 1, 0, 1 }, { 1, 0, 0, 1, 2, 0, 1, 0, 0, 1, 0, 0, 0, 2, 1 },
-          { 1, 0, 1, 1, 1, 1, 1, 2, 0, 1, 1, 1, 1, 1, 1 }, { 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 2, 0, 0, 0, 1 },
-          { 1, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 }, { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 } };
+  public ArrayList<Texture> textures;
+  public Camera camera;
+  public Screen screen;
+  public Fire fire;
+  public int width, height;
+  public boolean haveShootAlreadyInLast10Sec = false;
+  public int timePassed = 0;
+  public static int[][] map = { //
+          { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }, //
+          { 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1 }, //
+          { 1, 0, 3, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 1 }, //
+          { 1, 0, 3, 0, 0, 0, 3, 0, 1, 0, 0, 0, 0, 0, 1 }, //
+          { 1, 0, 3, 0, 0, 0, 2, 0, 1, 1, 1, 0, 1, 1, 1 }, //
+          { 1, 0, 3, 0, 0, 0, 3, 0, 1, 0, 0, 0, 0, 0, 1 }, //
+          { 1, 0, 3, 3, 0, 3, 3, 0, 1, 0, 0, 0, 0, 0, 1 }, //
+          { 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1 }, //
+          { 1, 1, 1, 1, 1, 1, 1, 1, 4, 4, 4, 0, 4, 4, 4 }, //
+          { 1, 0, 0, 0, 0, 0, 1, 4, 0, 0, 0, 0, 0, 0, 4 }, //
+          { 1, 0, 0, 0, 0, 0, 1, 4, 0, 0, 0, 0, 0, 0, 4 }, //
+          { 1, 0, 0, 0, 0, 0, 1, 4, 0, 3, 3, 3, 3, 0, 4 }, //
+          { 1, 0, 0, 0, 0, 0, 1, 4, 0, 3, 3, 3, 3, 0, 4 }, //
+          { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4 }, //
+          { 1, 1, 1, 1, 1, 1, 1, 4, 4, 4, 4, 4, 4, 4, 4 } };//
 
   public TestGameIdea() {
-    camera = new Camera(4.5, 4.5, 1, 0, 0, -.66);
-    addKeyListener(camera);
     thread = new Thread(this);
     image = new BufferedImage(640, 480, BufferedImage.TYPE_INT_RGB);
     pixels = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
@@ -54,7 +53,11 @@ public class TestGameIdea extends JFrame implements Runnable {
     textures.add(Texture.brick);
     textures.add(Texture.bluestone);
     textures.add(Texture.stone);
+    camera = new Camera(4.5, 4.5, 1, 0, 0, -.66);
     screen = new Screen(map, mapWidth, mapHeight, textures, 640, 480);
+    fire = new Fire(map, 640, 480, monsterAlive, monsterHealth, camera, haveShootAlreadyInLast10Sec, timePassed);
+    addKeyListener(camera);
+    addKeyListener(fire);
     setSize(640, 480);
     setResizable(false);
     setTitle("3D Engine");
@@ -65,15 +68,16 @@ public class TestGameIdea extends JFrame implements Runnable {
     start();
   }
 
-  public static void main(String[] args) {
-    TestGameIdea testGameIdea;
-    testGameIdea = new TestGameIdea();
-  }
-
-  private static Icon resizeIcon(ImageIcon icon, int resizedWidth, int resizedHeight) {
-    Image img = icon.getImage();
-    Image resizedImage = img.getScaledInstance(resizedWidth, resizedHeight, java.awt.Image.SCALE_SMOOTH);
-    return new ImageIcon(resizedImage);
+  public TestGameIdea(int[][] m, int w, int h, boolean ma, int mo, Camera c, boolean a, int t) {
+    map = m;
+    width = w;
+    height = h;
+    camera = c;
+    monsterAlive = ma;
+    monsterHealth = mo;
+    haveShootAlreadyInLast10Sec = a;
+    timePassed = t;
+    fire = new Fire(map, 640, 480, monsterAlive, monsterHealth, camera, haveShootAlreadyInLast10Sec, timePassed);
   }
 
   private synchronized void start() {
@@ -112,13 +116,26 @@ public class TestGameIdea extends JFrame implements Runnable {
       lastTime = now;
       while (delta >= 1)// Make sure update is only happening 60 times a second
       {
+        if (haveShootAlreadyInLast10Sec == true) {
+          if (timePassed > 599) {
+            haveShootAlreadyInLast10Sec = false;
+            timePassed = 0;
+          } else {
+            timePassed++;
+          }
+        }
         // handles all of the logic restricted time
+        fire = new Fire(map, 640, 480, monsterAlive, monsterHealth, camera, haveShootAlreadyInLast10Sec, timePassed);
         screen.update(camera, pixels);
         camera.update(map);
+
         delta--;
       }
       render();// displays to the screen unrestricted time
     }
   }
 
+  public static void main(String[] args) {
+    TestGameIdea game = new TestGameIdea();
+  }
 }

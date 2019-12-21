@@ -75,11 +75,12 @@ public class Screen {
           side = 1;
         }
         // Check if ray has hit a wall
-        // System.out.println(mapX + ", " + mapY + ", " + map[mapX][mapY]);
+
         if (map[mapX][mapY] > 0) {
           hit = true;
         }
       }
+      System.out.println(map[mapX][mapY]);
       // Calculate distance to the point of impact
       if (side == 0) {
         perpWallDist = Math.abs((mapX - camera.xPos + (1 - stepX) / 2) / rayDirX);
