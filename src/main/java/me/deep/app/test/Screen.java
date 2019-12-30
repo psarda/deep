@@ -4,12 +4,10 @@ import java.awt.Color;
 import java.util.ArrayList;
 
 public class Screen {
-  public int[][] map;
   public int mapWidth, mapHeight, width, height;
   public ArrayList<Texture> textures;
 
-  public Screen(int[][] m, int mapW, int mapH, ArrayList<Texture> tex, int w, int h) {
-    map = m;
+  public Screen(int mapW, int mapH, ArrayList<Texture> tex, int w, int h) {
     mapWidth = mapW;
     mapHeight = mapH;
     textures = tex;
@@ -17,7 +15,7 @@ public class Screen {
     height = h;
   }
 
-  public int[] update(Camera camera, int[] pixels) {
+  public int[] update(int map[][], Camera camera, int[] pixels) {
     for (int n = 0; n < pixels.length / 2; n++) {
       if (pixels[n] != Color.DARK_GRAY.getRGB()) {
         pixels[n] = Color.DARK_GRAY.getRGB();
@@ -80,7 +78,7 @@ public class Screen {
           hit = true;
         }
       }
-      System.out.println(map[mapX][mapY]);
+      // System.out.println(map[mapX][mapY]);
       // Calculate distance to the point of impact
       if (side == 0) {
         perpWallDist = Math.abs((mapX - camera.xPos + (1 - stepX) / 2) / rayDirX);

@@ -10,29 +10,49 @@ import java.util.ArrayList;
 import javax.swing.JFrame;
 
 public class TestGameIdea extends JFrame implements Runnable {
-
+  int monsterXpos, monsterYpos;
+  public static JFrame frame;
+  public static int mobMax = 100;
   private static final long serialVersionUID = 1L;
-  public int mapWidth = 15;
-  public int mapHeight = 15;
-  public int monsterHealth = 100;
-  public boolean monsterAlive = true;
+  public static int mapWidth = 15;
+  public static int mapHeight = 15;
+  public static int monsterHealth = 100;
+  public static boolean monsterAlive = true;
+  public static int playerHealth = 100;
+  public static int mobXPos = 1, mobYPos = 1;
   private Thread thread;
-  private boolean running;
+  private static boolean running;
   private BufferedImage image;
-  public int[] pixels;
-  public ArrayList<Texture> textures;
-  public Camera camera;
-  public Screen screen;
-  public Fire fire;
-  public int width, height;
-  public boolean haveShootAlreadyInLast10Sec = false;
-  public int timePassed = 0;
+  public static int[] pixels;
+  public static ArrayList<Texture> textures;
+  public static Camera camera;
+  public static Screen screen;
+  public static Fire fire;
+  public static int width, height;
+  public static boolean haveShootAlreadyInLast10Sec = false;
+  public static int timePassed = 0;
   public static int[][] map = { //
+          { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }, //
+          { 1, 2, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1 }, //
+          { 1, 0, 3, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 1 }, //
+          { 1, 0, 3, 0, 0, 0, 3, 0, 1, 0, 0, 0, 0, 0, 1 }, //
+          { 1, 0, 3, 0, 0, 0, 3, 0, 1, 1, 1, 0, 1, 1, 1 }, //
+          { 1, 0, 3, 0, 0, 0, 3, 0, 1, 0, 0, 0, 0, 0, 1 }, //
+          { 1, 0, 3, 3, 0, 3, 3, 0, 1, 0, 0, 0, 0, 0, 1 }, //
+          { 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1 }, //
+          { 1, 1, 1, 1, 1, 1, 1, 1, 4, 4, 4, 0, 4, 4, 4 }, //
+          { 1, 0, 0, 0, 0, 0, 1, 4, 0, 0, 0, 0, 0, 0, 4 }, //
+          { 1, 0, 0, 0, 0, 0, 1, 4, 0, 0, 0, 0, 0, 0, 4 }, //
+          { 1, 0, 0, 0, 0, 0, 1, 4, 0, 3, 3, 3, 3, 0, 4 }, //
+          { 1, 0, 0, 0, 0, 0, 1, 4, 0, 3, 3, 3, 3, 0, 4 }, //
+          { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4 }, //
+          { 1, 1, 1, 1, 1, 1, 1, 4, 4, 4, 4, 4, 4, 4, 4 } };//
+  public static int[][] mapSecondHand = { //
           { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }, //
           { 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1 }, //
           { 1, 0, 3, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 1 }, //
           { 1, 0, 3, 0, 0, 0, 3, 0, 1, 0, 0, 0, 0, 0, 1 }, //
-          { 1, 0, 3, 0, 0, 0, 2, 0, 1, 1, 1, 0, 1, 1, 1 }, //
+          { 1, 0, 3, 0, 0, 0, 3, 0, 1, 1, 1, 0, 1, 1, 1 }, //
           { 1, 0, 3, 0, 0, 0, 3, 0, 1, 0, 0, 0, 0, 0, 1 }, //
           { 1, 0, 3, 3, 0, 3, 3, 0, 1, 0, 0, 0, 0, 0, 1 }, //
           { 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1 }, //
@@ -44,20 +64,30 @@ public class TestGameIdea extends JFrame implements Runnable {
           { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4 }, //
           { 1, 1, 1, 1, 1, 1, 1, 4, 4, 4, 4, 4, 4, 4, 4 } };//
 
+  public TestGameIdea(String h) {
+    System.out.println(h);
+  }
+
   public TestGameIdea() {
+    //
     thread = new Thread(this);
+    //
     image = new BufferedImage(640, 480, BufferedImage.TYPE_INT_RGB);
+    //
+    Progress progress = new Progress(playerHealth, mobMax, monsterHealth, timePassed);
+    //
     pixels = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
     textures = new ArrayList<Texture>();
     textures.add(Texture.wood);
     textures.add(Texture.brick);
     textures.add(Texture.bluestone);
     textures.add(Texture.stone);
+    //
     camera = new Camera(4.5, 4.5, 1, 0, 0, -.66);
-    screen = new Screen(map, mapWidth, mapHeight, textures, 640, 480);
-    fire = new Fire(map, 640, 480, monsterAlive, monsterHealth, camera, haveShootAlreadyInLast10Sec, timePassed);
+    screen = new Screen(mapWidth, mapHeight, textures, 640, 480);
+    //
     addKeyListener(camera);
-    addKeyListener(fire);
+    //
     setSize(640, 480);
     setResizable(false);
     setTitle("3D Engine");
@@ -65,19 +95,9 @@ public class TestGameIdea extends JFrame implements Runnable {
     setBackground(Color.black);
     setLocationRelativeTo(null);
     setVisible(true);
+    //
     start();
-  }
 
-  public TestGameIdea(int[][] m, int w, int h, boolean ma, int mo, Camera c, boolean a, int t) {
-    map = m;
-    width = w;
-    height = h;
-    camera = c;
-    monsterAlive = ma;
-    monsterHealth = mo;
-    haveShootAlreadyInLast10Sec = a;
-    timePassed = t;
-    fire = new Fire(map, 640, 480, monsterAlive, monsterHealth, camera, haveShootAlreadyInLast10Sec, timePassed);
   }
 
   private synchronized void start() {
@@ -87,19 +107,25 @@ public class TestGameIdea extends JFrame implements Runnable {
 
   public synchronized void stop() {
     running = false;
+    //
     try {
       thread.join();
     } catch (InterruptedException e) {
       e.printStackTrace();
     }
+    //
   }
 
   public void render() {
     BufferStrategy bs = getBufferStrategy();
+    //
     if (bs == null) {
+      //
       createBufferStrategy(3);
       return;
+      //
     }
+    //
     Graphics g = bs.getDrawGraphics();
     g.drawImage(image, 0, 0, image.getWidth(), image.getHeight(), null);
     bs.show();
@@ -110,29 +136,213 @@ public class TestGameIdea extends JFrame implements Runnable {
     final double ns = 1000000000.0 / 60.0;// 60 times per second
     double delta = 0;
     requestFocus();
+    //
     while (running) {
       long now = System.nanoTime();
       delta = delta + ((now - lastTime) / ns);
       lastTime = now;
+      //
       while (delta >= 1)// Make sure update is only happening 60 times a second
       {
-        if (haveShootAlreadyInLast10Sec == true) {
-          if (timePassed > 599) {
-            haveShootAlreadyInLast10Sec = false;
-            timePassed = 0;
-          } else {
-            timePassed++;
-          }
-        }
-        // handles all of the logic restricted time
-        fire = new Fire(map, 640, 480, monsterAlive, monsterHealth, camera, haveShootAlreadyInLast10Sec, timePassed);
-        screen.update(camera, pixels);
-        camera.update(map);
-
+        update();
         delta--;
       }
       render();// displays to the screen unrestricted time
     }
+  }
+
+  public static void update() {
+    mobUpdate();
+
+    if (haveShootAlreadyInLast10Sec == true) {
+      //
+      if (timePassed < 599) {
+        // System.out.println("working fine");
+        increaseTime();
+      }
+    }
+    //
+    if (timePassed == 599) {
+      timePassed = 0;
+      haveShootAlreadyInLast10Sec = false;
+    }
+    // handles all of the logic restricted time
+    screen.update(map, camera, pixels); //
+    camera.update(map, camera, haveShootAlreadyInLast10Sec, monsterAlive, monsterHealth, timePassed);//
+    Progress progress = new Progress();
+    progress.update(playerHealth, monsterHealth, timePassed, haveShootAlreadyInLast10Sec, camera);
+  }
+
+  private static void teleportMonster() {
+    int teleportXPos = 0;
+    int teleportYPos = 0;
+    boolean freeSpace = false;
+    while (freeSpace == false) {
+      teleportXPos = (int) (Math.random() * 15);
+      while (teleportXPos < 0 || teleportXPos > 15) {
+        teleportXPos = (int) (Math.random() * 15);
+      }
+      teleportYPos = (int) (Math.random() * 15);
+      while (teleportYPos < 0 || teleportYPos > 15) {
+        teleportYPos = (int) (Math.random() * 15);
+      }
+
+    }
+  }
+
+  private static void moveMonster() {
+    //
+    boolean spaceThereXPositive = true;
+    boolean spaceThereXNegative = true;
+    boolean spaceThereYPositive = true;
+    boolean spaceThereYNegative = true;
+    //
+    int mobXPosPositive = mobXPos + 1;
+    int mobXPosNegative = mobXPos - 1;
+    //
+    int mobYPosPositive = mobYPos + 1;
+    int mobYPosNegative = mobYPos - 1;
+    //
+    if (mobXPosNegative < 0) {
+      //
+      spaceThereXNegative = false;
+      mobXPosNegative = 3;// random to stop the error
+      //
+    }
+    if (mobYPosNegative < 0) {
+      //
+      spaceThereYNegative = false;
+      mobYPosNegative = 3;// random to stop the error
+      //
+    }
+    if (mobXPosPositive > 15) {
+      //
+      mobXPosPositive = 3;// random to stop the error
+      spaceThereXPositive = false;
+    }
+    if (mobYPosPositive > 15) {
+      //
+      mobYPosPositive = 3;// random to stop the error
+      spaceThereYPositive = false;
+    }
+    //
+    int random = (int) (Math.random() * 2);
+    if (random == 0) {
+      //
+
+      if (map[mobXPosPositive][mobYPos] == 0) {
+        if (spaceThereXPositive == true) {
+          //
+
+          map[mobXPos][mobYPos] = 0;
+          System.out.println(map[1][1]);
+          mobXPos = mobXPosPositive;
+          map[mobXPosPositive][mobYPos] = 2;
+        } //
+      } else if (map[mobXPosNegative][mobYPos] == 0) {
+        if (spaceThereXNegative == true) {
+          //
+
+          map[mobXPos][mobYPos] = 0;
+          mobXPos = mobXPosNegative;
+          map[mobXPosNegative][mobYPos] = 2;
+        } //
+      }
+    }
+    if (random == 1) {
+      //
+      if (map[mobXPos][mobYPosPositive] == 0) {
+        if (spaceThereYPositive == true) {
+          //
+
+          map[mobXPos][mobYPos] = 0;
+          mobYPos = mobYPosPositive;
+          map[mobXPos][mobYPos] = 2;
+        } //
+      } else if (map[mobXPos][mobYPosNegative] == 0) {
+        if (spaceThereYNegative == true) {
+          //
+
+          map[mobXPos][mobYPos] = 0;
+          mobYPos = mobYPosNegative;
+          map[mobXPos][mobYPos] = 2;
+          //
+        }
+      }
+    }
+  }
+
+  private static boolean distanceFromMonster(boolean monsterShoot) {
+    double distance = 0;
+    //
+    if (camera.xPos > mobXPos) {
+      //
+      double XDistance = camera.xPos - mobXPos;
+      distance = distance + XDistance;
+      //
+    } else {
+      //
+      double XDistance = mobXPos - camera.xPos;
+      distance = distance + XDistance;
+      //
+    }
+    if (camera.yPos > mobYPos) {
+      //
+      double YDistance = camera.yPos - mobYPos;
+      distance = distance + YDistance;
+      //
+    } else {
+      //
+      double YDistance = mobYPos - camera.yPos;
+      distance = distance + YDistance;
+      //
+    }
+    if (distance < 4) {
+      //
+      monsterShoot = true;
+      int random = (int) (Math.random() * 180);
+      //
+      if (random == 0) {
+        playerHealth = playerHealth - 10;
+      }
+      //
+    }
+    return monsterShoot;
+  }
+
+  private static void mobUpdate() {
+    boolean monsterShoot = false;
+    distanceFromMonster(monsterShoot);
+    if (monsterShoot == false) {
+      int random = (int) (Math.random() * 60);
+      if (random == 0) {
+        moveMonster();
+      }
+    }
+  }
+
+  public TestGameIdea(int[][] m, boolean ma, int mo, boolean a, int t) {
+    map = m;
+    monsterAlive = ma;
+    monsterHealth = mo;
+    haveShootAlreadyInLast10Sec = a;
+    timePassed = t;
+  }
+
+  public TestGameIdea(boolean ma, int mo, boolean a) {
+    monsterAlive = ma;
+    monsterHealth = mo;
+    haveShootAlreadyInLast10Sec = a;
+  }
+
+  public static void increaseTime() {
+    timePassed++;
+
+  }
+
+  public TestGameIdea(int t, boolean b) {
+    timePassed = t;
+    haveShootAlreadyInLast10Sec = b;
   }
 
   public static void main(String[] args) {

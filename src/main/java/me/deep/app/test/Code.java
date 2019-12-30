@@ -137,7 +137,7 @@ public class Code implements Serializable {
     } else if (c == '0') {
       return '>';
     } else {
-      return ' ';
+      return c;
     }
   }
 

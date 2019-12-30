@@ -136,7 +136,7 @@ public class Uncode implements Serializable {
     } else if (c == '>') {
       return '0';
     } else {
-      return ' ';
+      return c;
     }
   }
 
