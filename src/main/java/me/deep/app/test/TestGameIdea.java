@@ -5,6 +5,7 @@ import java.awt.Graphics;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
+import java.io.IOException;
 import java.util.ArrayList;
 
 import javax.swing.JFrame;
@@ -19,8 +20,12 @@ public class TestGameIdea extends JFrame implements Runnable {
   public static int monsterHealth = 100;
   public static boolean monsterAlive = true;
   public static int playerHealth = 100;
-  public static int mobXPos = 1, mobYPos = 1;
-  private Thread thread;
+  public static int mobXPos = 12, mobYPos = 13;
+  public static int waveNoAndMobNumber = 1;
+  public static int moneyEarned = 0;
+  public static int mobNumber = 1;
+  private static Thread thread;
+  public static int playerRegen = 0;
   private static boolean running;
   private BufferedImage image;
   public static int[] pixels;
@@ -30,21 +35,22 @@ public class TestGameIdea extends JFrame implements Runnable {
   public static Fire fire;
   public static int width, height;
   public static boolean haveShootAlreadyInLast10Sec = false;
+  public static boolean endGame = false;
   public static int timePassed = 0;
   public static int[][] map = { //
           { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }, //
-          { 1, 2, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1 }, //
-          { 1, 0, 3, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 1 }, //
-          { 1, 0, 3, 0, 0, 0, 3, 0, 1, 0, 0, 0, 0, 0, 1 }, //
-          { 1, 0, 3, 0, 0, 0, 3, 0, 1, 1, 1, 0, 1, 1, 1 }, //
-          { 1, 0, 3, 0, 0, 0, 3, 0, 1, 0, 0, 0, 0, 0, 1 }, //
-          { 1, 0, 3, 3, 0, 3, 3, 0, 1, 0, 0, 0, 0, 0, 1 }, //
-          { 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1 }, //
-          { 1, 1, 1, 1, 1, 1, 1, 1, 4, 4, 4, 0, 4, 4, 4 }, //
-          { 1, 0, 0, 0, 0, 0, 1, 4, 0, 0, 0, 0, 0, 0, 4 }, //
-          { 1, 0, 0, 0, 0, 0, 1, 4, 0, 0, 0, 0, 0, 0, 4 }, //
-          { 1, 0, 0, 0, 0, 0, 1, 4, 0, 3, 3, 3, 3, 0, 4 }, //
-          { 1, 0, 0, 0, 0, 0, 1, 4, 0, 3, 3, 3, 3, 0, 4 }, //
+          { 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1 }, //
+          { 1, 0, 3, 3, 3, 3, 3, 0, 0, 0, 0, 1, 1, 0, 1 }, //
+          { 1, 0, 3, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1 }, //
+          { 1, 0, 3, 0, 0, 3, 3, 0, 1, 1, 1, 1, 1, 0, 1 }, //
+          { 1, 0, 3, 0, 0, 3, 3, 0, 1, 0, 0, 0, 0, 0, 1 }, //
+          { 1, 0, 3, 3, 0, 3, 3, 0, 1, 0, 3, 0, 4, 0, 1 }, //
+          { 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 3, 0, 4, 0, 1 }, //
+          { 1, 1, 0, 1, 0, 1, 1, 1, 4, 4, 4, 0, 4, 4, 4 }, //
+          { 1, 0, 0, 3, 0, 0, 1, 4, 0, 4, 0, 0, 0, 0, 4 }, //
+          { 1, 0, 0, 3, 0, 0, 1, 4, 0, 4, 0, 0, 0, 0, 4 }, //
+          { 1, 0, 3, 3, 3, 0, 1, 4, 0, 0, 0, 0, 0, 0, 4 }, //
+          { 1, 0, 0, 3, 0, 0, 1, 4, 0, 3, 3, 3, 3, 2, 4 }, //
           { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4 }, //
           { 1, 1, 1, 1, 1, 1, 1, 4, 4, 4, 4, 4, 4, 4, 4 } };//
   public static int[][] mapSecondHand = { //
@@ -70,34 +76,42 @@ public class TestGameIdea extends JFrame implements Runnable {
 
   public TestGameIdea() {
     //
-    thread = new Thread(this);
-    //
-    image = new BufferedImage(640, 480, BufferedImage.TYPE_INT_RGB);
-    //
-    Progress progress = new Progress(playerHealth, mobMax, monsterHealth, timePassed);
-    //
-    pixels = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
-    textures = new ArrayList<Texture>();
-    textures.add(Texture.wood);
-    textures.add(Texture.brick);
-    textures.add(Texture.bluestone);
-    textures.add(Texture.stone);
-    //
-    camera = new Camera(4.5, 4.5, 1, 0, 0, -.66);
-    screen = new Screen(mapWidth, mapHeight, textures, 640, 480);
-    //
-    addKeyListener(camera);
-    //
-    setSize(640, 480);
-    setResizable(false);
-    setTitle("3D Engine");
-    setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    setBackground(Color.black);
-    setLocationRelativeTo(null);
-    setVisible(true);
-    //
-    start();
+    if (endGame == false) {
+      thread = new Thread(this);
+      //
+      image = new BufferedImage(640, 480, BufferedImage.TYPE_INT_RGB);
+      //
+      Progress progress = new Progress(playerHealth, mobMax, monsterHealth, timePassed, waveNoAndMobNumber);
+      //
+      pixels = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
+      textures = new ArrayList<Texture>();
+      textures.add(Texture.wood);
+      textures.add(Texture.brick);
+      textures.add(Texture.bluestone);
+      textures.add(Texture.stone);
+      //
+      camera = new Camera(4, 4, 1, 0, 0, -.66);
+      screen = new Screen(mapWidth, mapHeight, textures, 640, 480);
+      //
+      addKeyListener(camera);
+      //
+      setSize(640, 480);
+      setResizable(false);
+      setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+      setBackground(Color.black);
+      setLocationRelativeTo(null);
+      setVisible(true);
+      //
+      start();
+    } else {
+      setVisible(false);
+    }
+  }
 
+  public static void open(int i) {
+    waveNoAndMobNumber = i;
+    mobNumber = i;
+    TestGameIdea game = new TestGameIdea();
   }
 
   private synchronized void start() {
@@ -144,14 +158,56 @@ public class TestGameIdea extends JFrame implements Runnable {
       //
       while (delta >= 1)// Make sure update is only happening 60 times a second
       {
-        update();
+        try {
+          update();
+        } catch (ClassNotFoundException e) {
+          // TODO Auto-generated catch block
+          e.printStackTrace();
+        } catch (IOException e) {
+          // TODO Auto-generated catch block
+          e.printStackTrace();
+        }
         delta--;
       }
       render();// displays to the screen unrestricted time
     }
   }
 
-  public static void update() {
+  public static void update() throws ClassNotFoundException, IOException {
+    if (monsterHealth < 1) {
+      waveNoAndMobNumber--;
+      monsterHealth = 100;
+    }
+    //
+    if (waveNoAndMobNumber < 1) {
+      moneyEarned = mobNumber * 20;
+      running = false;
+      //
+      try {
+        thread.join();
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      }
+      TestGameIdea testGame = new TestGameIdea();
+      mobNumber++;
+      MyGame game = new MyGame(moneyEarned, mobNumber);
+      //
+    }
+    //
+    if (playerHealth < 1) {
+      moneyEarned = waveNoAndMobNumber * 20;
+      running = false;
+      //
+      try {
+        thread.join();
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      }
+      //
+      TestGameIdea testGame = new TestGameIdea();
+      MyGame game = new MyGame(moneyEarned, mobNumber);
+
+    }
     mobUpdate();
 
     if (haveShootAlreadyInLast10Sec == true) {
@@ -162,6 +218,17 @@ public class TestGameIdea extends JFrame implements Runnable {
       }
     }
     //
+    if (playerRegen < 599) {
+      playerRegen++;
+    } else {
+      if (playerHealth < 100) {
+        playerHealth = playerHealth + 10;
+        if (playerHealth > 100) {
+          playerHealth = 100;
+        }
+      }
+      playerRegen = 0;
+    }
     if (timePassed == 599) {
       timePassed = 0;
       haveShootAlreadyInLast10Sec = false;
@@ -170,7 +237,7 @@ public class TestGameIdea extends JFrame implements Runnable {
     screen.update(map, camera, pixels); //
     camera.update(map, camera, haveShootAlreadyInLast10Sec, monsterAlive, monsterHealth, timePassed);//
     Progress progress = new Progress();
-    progress.update(playerHealth, monsterHealth, timePassed, haveShootAlreadyInLast10Sec, camera);
+    progress.update(playerHealth, monsterHealth, timePassed, haveShootAlreadyInLast10Sec, camera, waveNoAndMobNumber);
   }
 
   private static void teleportMonster() {
@@ -186,7 +253,13 @@ public class TestGameIdea extends JFrame implements Runnable {
       while (teleportYPos < 0 || teleportYPos > 15) {
         teleportYPos = (int) (Math.random() * 15);
       }
-
+      if (map[teleportXPos][teleportYPos] == 0) {
+        map[mobXPos][mobYPos] = 0;
+        mobXPos = teleportXPos;
+        mobYPos = teleportYPos;
+        map[mobXPos][mobYPos] = 2;
+        freeSpace = true;
+      }
     }
   }
 
@@ -316,7 +389,12 @@ public class TestGameIdea extends JFrame implements Runnable {
     if (monsterShoot == false) {
       int random = (int) (Math.random() * 60);
       if (random == 0) {
-        moveMonster();
+        int moveRandom = (int) (Math.random() * 3);
+        if (moveRandom == 0) {
+          teleportMonster();
+        } else {
+          moveMonster();
+        }
       }
     }
   }

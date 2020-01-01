@@ -1,8 +1,10 @@
 package me.deep.app.test;
 
+import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.EOFException;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -12,6 +14,7 @@ import java.io.Serializable;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -26,12 +29,20 @@ public class MyGame implements Serializable {
   private static String FILENAME2 = ".txt";
   private static String GAMENAME;
   private static String ALLMYGAMES;
-  private static Integer FINALLEVEL;
+  private static Integer FINALLEVEL = 1;
   private static Integer FINALMONEY;
   private static Integer FINALWEAPONLEVEL;
   private static String InGameName = " ";
+  public static boolean saveProgress = false;
   static String username;
   static boolean didStoryLine = false;
+
+  public MyGame(int m, int i) throws ClassNotFoundException, IOException {
+    money = money + m;
+    level = i;
+    saveProgress = true;
+    readTheFileForTheGame();
+  }
 
   public MyGame() {
 
@@ -39,7 +50,19 @@ public class MyGame implements Serializable {
 
   public static void main(String[] args) throws ClassNotFoundException, IOException {
     // startStoryLine();
+    File tempFile = new File(FILENAME);
+    boolean exists = tempFile.exists();
+    if (exists == false) {
+      MyGame myGame1 = new MyGame();
+      MyGame.ALLMYGAMES = "Your games are:-";
+      FileOutputStream file2 = new FileOutputStream(FILENAME);
+      ObjectOutputStream out1 = new ObjectOutputStream(file2);
 
+      out1.writeObject(myGame1);
+
+      out1.close();
+      file2.close();
+    }
     openWindow();
   }
 
@@ -62,19 +85,12 @@ public class MyGame implements Serializable {
   static Integer weaponLevel;
   static Integer buyPrice;
 
-  private static void startGame() {
-
+  private static void startGame() throws ClassNotFoundException, EOFException, IOException {
+    saveProgress = true;
+    readTheFileForTheGame();
   }
 
-  private static void fire() {
-
-  }
-
-  private static void shop() {
-
-  }
-
-  private static void startStoryLine() throws IOException {
+  private static void startStoryLine() throws ClassNotFoundException, EOFException, IOException {
     String message = "WELCOME \n \n \n " + InGameName;
     final JFrame frame = new JFrame(message);
     String manSpeak = "<man>";
@@ -84,7 +100,18 @@ public class MyGame implements Serializable {
     button.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         frame.setVisible(false);
-        startGame();
+        try {
+          startGame();
+        } catch (ClassNotFoundException e1) {
+          // TODO Auto-generated catch block
+          e1.printStackTrace();
+        } catch (EOFException e1) {
+          // TODO Auto-generated catch block
+          e1.printStackTrace();
+        } catch (IOException e1) {
+          // TODO Auto-generated catch block
+          e1.printStackTrace();
+        }
       }
     });
 
@@ -175,8 +202,7 @@ public class MyGame implements Serializable {
     } catch (Exception e) {
 
     }
-    voice.setText(continuningSecretarySpeak
-            + "These are very powerful. \n They can teleport and change into any object they want");
+    voice.setText(continuningSecretarySpeak + "These are very powerful. \n They can teleport");
     voice.requestFocus();
     try {
       Thread.sleep(5000);
@@ -198,14 +224,7 @@ public class MyGame implements Serializable {
 
     }
     didStoryLine = true;
-  }
-
-  private static void wave() {
-
-  }
-
-  private static void level() {
-
+    startGame();
   }
 
   private static void openWindow() throws IOException, ClassNotFoundException {
@@ -224,16 +243,46 @@ public class MyGame implements Serializable {
     }
   }
 
+  private static void completeStartGame() {
+    saveProgress = false;
+    String levelDisplay = "level no:- \n" + level;
+    final JFrame frame = new JFrame();
+    JLabel label = new JLabel(levelDisplay);
+    JButton start = new JButton("click me to start");
+    start.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        frame.setVisible(false);
+        TestGameIdea test = new TestGameIdea("lol this is of no use");
+        TestGameIdea.open(level);
+      }
+    });
+    frame.add(BorderLayout.EAST, start);
+    frame.add(label);
+    frame.setSize(480, 640);
+    frame.setVisible(true);
+
+  }
+
   private static void store() throws IOException, ClassNotFoundException {
-    String userInput = JOptionPane.showInputDialog("Enter the world name");
-    FILENAME1 = userInput + FILENAME1;
-    String userInput1 = JOptionPane.showInputDialog("Enter your name");
-    InGameName = "Commander " + userInput1;
+    System.out.println(saveProgress);
+    String userInput = " ";
     MyGame myGame = new MyGame();
-    MyGame.FINALLEVEL = 1;
-    MyGame.FINALMONEY = 0;
-    MyGame.FINALWEAPONLEVEL = 1;
-    MyGame.username = InGameName;
+    if (saveProgress == false) {
+      userInput = JOptionPane.showInputDialog("Enter the world name");
+      FILENAME1 = userInput + FILENAME1;
+      String userInput1 = JOptionPane.showInputDialog("Enter your name");
+      InGameName = "Commander " + userInput1;
+
+      MyGame.FINALLEVEL = 1;
+      MyGame.FINALMONEY = 0;
+      MyGame.FINALWEAPONLEVEL = 1;
+      MyGame.username = InGameName;
+    } else {
+      System.out.println("Working fine");
+      MyGame.FINALLEVEL = level;
+      MyGame.FINALMONEY = money;
+      MyGame.FINALWEAPONLEVEL = 1;
+    }
     FileOutputStream file = new FileOutputStream(FILENAME1);
     ObjectOutputStream out = new ObjectOutputStream(file);
 
@@ -241,41 +290,41 @@ public class MyGame implements Serializable {
 
     out.close();
     file.close();
+    if (saveProgress == false) {
+      FileInputStream file1 = new FileInputStream(FILENAME);
+      ObjectInputStream in = new ObjectInputStream(file1);
+      MyGame myGame2 = (MyGame) in.readObject();
 
-    FileInputStream file1 = new FileInputStream(FILENAME);
-    ObjectInputStream in = new ObjectInputStream(file1);
-    MyGame myGame2 = (MyGame) in.readObject();
+      in.close();
+      file1.close();
 
-    in.close();
-    file1.close();
+      MyGame myGame1 = new MyGame();
+      MyGame.ALLMYGAMES = myGame2.ALLMYGAMES + "\n" + userInput;
+      FileOutputStream file2 = new FileOutputStream(FILENAME);
+      ObjectOutputStream out1 = new ObjectOutputStream(file2);
 
-    MyGame myGame1 = new MyGame();
-    MyGame.ALLMYGAMES = myGame2 + "\n" + userInput;
-    FileOutputStream file2 = new FileOutputStream(FILENAME);
-    ObjectOutputStream out1 = new ObjectOutputStream(file2);
+      out1.writeObject(myGame1);
 
-    out1.writeObject(myGame1);
-
-    out1.close();
-    file2.close();
-    startStoryLine();
-
+      out1.close();
+      file2.close();
+      startStoryLine();
+    } else {
+      completeStartGame();
+    }
   }
 
   private static void readTheFileForTheGame() throws IOException, ClassNotFoundException, EOFException {
-    String userInput = JOptionPane.showInputDialog("enter the world name");
-    FILENAME2 = userInput + FILENAME2;
-    FileInputStream file = new FileInputStream(FILENAME2);
+    FileInputStream file = new FileInputStream(FILENAME1);
     ObjectInputStream in = new ObjectInputStream(file);
     MyGame myGame = (MyGame) in.readObject();
 
     in.close();
     file.close();
     money = MyGame.FINALMONEY;
-    level = MyGame.FINALMONEY;
+    level = MyGame.FINALLEVEL;
     weaponLevel = MyGame.FINALWEAPONLEVEL;
     InGameName = MyGame.username;
-    startGame();
+    completeStartGame();
   }
 
   private static void SeeHistory() throws IOException, ClassNotFoundException {

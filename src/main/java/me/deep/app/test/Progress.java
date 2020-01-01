@@ -1,6 +1,7 @@
 package me.deep.app.test;
 
 import java.awt.BorderLayout;
+import java.text.DecimalFormat;
 
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -15,23 +16,24 @@ public class Progress extends JFrame {
   public static JProgressBar monsterHealthPB;
   public static JProgressBar gunCoolDownTimer;
   public static JLabel coordinates;
+  static JFrame frame;
 
-  public Progress(int p, int m, int mo, int t) {
+  public Progress(int p, int m, int mo, int t, int k) {
     playerHealth = p;
     mobMax = m;
     monsterHealth = mo;
     t = timepassed;
 
-    createProgressBar();
+    createProgressBar(k);
   }
 
   public Progress() {
 
   }
 
-  public void createProgressBar() {
-    JFrame frame = new JFrame();
-    String coordinatesString = "X pos:- 4.5 + \n Y pos:- 4.5";
+  public void createProgressBar(int k) {
+    frame = new JFrame();
+    String coordinatesString = "X pos:- \n 4 + \n Y pos:- \n 4 \n number of monsters left:- \n" + k;
     JPanel coordinatesPanel = new JPanel();
     coordinates = new JLabel(coordinatesString);
     coordinatesPanel.add(coordinates);
@@ -59,12 +61,14 @@ public class Progress extends JFrame {
     frame.setVisible(true);
   }
 
-  public void update(int p, int mo, int t, boolean b, Camera cam) {
-    changeProgressBarValue(p, mo, t, b, cam);
+  public void update(int p, int mo, int t, boolean b, Camera cam, int k) {
+    changeProgressBarValue(p, mo, t, b, cam, k);
   }
 
-  private static void changeProgressBarValue(int p, int mo, int t, boolean b, Camera cam) {
-    String coordinatesString = "X pos:-" + cam.xPos + "\n Y pos:-" + cam.yPos;
+  private static void changeProgressBarValue(int p, int mo, int t, boolean b, Camera cam, int k) {
+    DecimalFormat numberFormat = new DecimalFormat("#.00");
+    String coordinatesString = "X pos:- \n" + numberFormat.format(cam.xPos) + "\n Y pos:- \n"
+            + numberFormat.format(cam.yPos) + "\n number of monsters left:- \n" + k;
     coordinates.setText(coordinatesString);
     int timePassedInSec = t / 60;
     if (p != playerHealth) {
