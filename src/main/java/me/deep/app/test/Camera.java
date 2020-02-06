@@ -6,7 +6,7 @@ import java.awt.event.KeyListener;
 public class Camera implements KeyListener {
   public double xPos, yPos, xDir, yDir, xPlane, yPlane;
   public boolean left, right, forward, back;
-  public final double MOVE_SPEED = .08;
+  public final double MOVE_SPEED = 0.08;
   public final double ROTATION_SPEED = .045;
   public int width = 640;
   public int[][] map;
@@ -106,7 +106,6 @@ public class Camera implements KeyListener {
       int MAPY = 0;
       try {
         if (haveShootAlreadyInLast10Sec == false) {
-          System.out.println("you shoot");
           fire = false;
           timePassed = 0;
           haveShootAlreadyInLast10Sec = true;

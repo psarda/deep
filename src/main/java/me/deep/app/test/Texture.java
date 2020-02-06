@@ -31,7 +31,7 @@ public class Texture {
   }
 
   public static Texture wood = new Texture("rsc/wood.png", 64);
-  public static Texture brick = new Texture("rsc/redbrick.png", 64);
+  public static Texture brick = new Texture("rsc/brick.png", 64);
   public static Texture bluestone = new Texture("rsc/bluestone.png", 64);
   public static Texture stone = new Texture("rsc/graystone.png", 64);
 }
