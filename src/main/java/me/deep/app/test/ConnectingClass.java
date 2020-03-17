@@ -14,12 +14,16 @@ public class ConnectingClass extends Applet {
   public void start(String USERNAME, JFrame frame) {
     System.out.println(USERNAME);
     String UserInput = JOptionPane.showInputDialog(frame,
-            "Enter cal for calculator \n Enter chat for chat application");
+            "Enter cal for calculator \n Enter chat for chat application \n enter game for game");
     String UserInputNoCaps = UserInput.toLowerCase();
     if (UserInputNoCaps.equals("cal")) {
       Calculator.main(null);
     } else if (UserInputNoCaps.equals("chat")) {
       new SimpleChatClient().start(USERNAME);
+    } else if (UserInputNoCaps.equals("game")) {
+      new TestGameIdea().start(USERNAME);
+    } else {
+      start(USERNAME, frame);
     }
   }
 

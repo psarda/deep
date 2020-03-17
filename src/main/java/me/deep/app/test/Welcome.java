@@ -159,7 +159,7 @@ public class Welcome {
       String password = userInfo[1];
       String userInputedString = JOptionPane.showInputDialog(frame, "Enter password ");
       if (userInputedString.equals(password)) {
-        new ConnectingClass().start(USERNAME, frame);
+        new ConnectingClass().start(userInfo[0], frame);
       } else {
         JOptionPane.showMessageDialog(frame, "Invalid password");
         checkPassword();

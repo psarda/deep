@@ -1,10 +1,8 @@
 package me.deep.app.test;
 
-import java.applet.Applet;
-
 import javax.swing.JOptionPane;
 
-public class Calculator extends Applet {
+public class Calculator {
 
   public static void main(String[] args) {
     openProgram();

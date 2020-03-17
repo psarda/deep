@@ -7,6 +7,8 @@ import java.awt.Graphics;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
@@ -21,6 +23,7 @@ import java.io.ObjectInputStream;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -32,7 +35,7 @@ import javax.swing.JTextField;
 import javax.swing.ScrollPaneConstants;
 
 public class TestGameIdea extends JFrame implements Runnable {
-  transient private static final String FILENAME = "AllMyGames.txt";
+  transient private static String FILENAME = "AllMyGames.txt";
   transient private static String FILENAME1 = ".txt";
   transient private static String FILENAME2 = ".txt";
   private static String GAMENAME;
@@ -41,8 +44,48 @@ public class TestGameIdea extends JFrame implements Runnable {
   static Integer FINALMONEY;
   private static Integer FINALWEAPONLEVEL;
   private static String InGameName = " ";
+  static String userName;
+
+  public static void start(String s) {
+    userName = s;
+    FILENAME = "users/" + s + "/" + FILENAME;
+    try {
+      File tempFile = new File(FILENAME);
+      boolean exists = tempFile.exists();
+      if (exists == false) {
+        FileWriter writer = new FileWriter(FILENAME);
+
+        writer.write("Your games are:-");
+        writer.close();
+      }
+    } catch (Exception e) {
+      // TODO: handle exception
+    }
+    try {
+      File tempFile = new File("users/" + s + "/settings.txt");
+      boolean exists = tempFile.exists();
+      if (!exists) {
+        FileWriter writer = new FileWriter("users/" + s + "/settings.txt");
+        writer.write(KeyEvent.VK_UP + "/" + KeyEvent.VK_DOWN + "/" + KeyEvent.VK_RIGHT + "/" + KeyEvent.VK_LEFT + "/"
+                + KeyEvent.VK_ENTER);
+        writer.close();
+      }
+    } catch (Exception e) {
+      // TODO: handle exception
+    }
+    try {
+      openWindow();
+    } catch (ClassNotFoundException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+  }
 
   public TestGameIdea(int[][] m, boolean ma, int mo, boolean a, int t) {
+
     map = m;
     monsterAlive = ma;
     monsterHealth = mo;
@@ -122,7 +165,7 @@ public class TestGameIdea extends JFrame implements Runnable {
       textures.add(Texture.bluestone);
       textures.add(Texture.stone);
       //
-      camera = new Camera(4, 4, 1, 0, 0, -.66);
+      camera = new Camera(4, 4, 1, 0, 0, -.66, "users/" + userName + "/settings.txt");
       screen = new Screen(mapWidth, mapHeight, textures, width, height);
       //
       frame.setSize(screenSize);
@@ -207,19 +250,6 @@ public class TestGameIdea extends JFrame implements Runnable {
   //
 
   public static void main(String[] args) throws IOException {
-    File tempFile = new File(FILENAME);
-    boolean exists = tempFile.exists();
-    if (exists == false) {
-      FileWriter writer2 = new FileWriter(FILENAME);
-      writer2.write("Your games are:-");
-      writer2.close();
-    }
-    try {
-      openWindow();
-    } catch (ClassNotFoundException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
 
   }
 
@@ -533,16 +563,26 @@ public class TestGameIdea extends JFrame implements Runnable {
         }
       }
     });
+    JButton settingsButton = new JButton("settings");
+    settingsButton.addActionListener(new ActionListener() {
 
+      public void actionPerformed(ActionEvent e) {
+
+        frameStartGame.setVisible(false);
+        new SettingsSetter().readThenUpdate();
+
+      }
+    });
+    frameStartGame.add(BorderLayout.SOUTH, settingsButton);
     frameStartGame.add(BorderLayout.EAST, start);
-    frameStartGame.add(label);
+    frameStartGame.add(BorderLayout.CENTER, label);
     frameStartGame.setSize(480, 640);
     frameStartGame.setVisible(true);
   }
 
   private static void startNewGameFirstTime() {
     String inputString = JOptionPane.showInputDialog("Enter game name");
-    FILENAME1 = inputString + FILENAME1;
+    FILENAME1 = "users/" + userName + "/" + inputString + FILENAME1;
     try {
       FileReader fileReader = new FileReader(FILENAME1);
       BufferedReader reader = new BufferedReader(fileReader);
@@ -559,6 +599,16 @@ public class TestGameIdea extends JFrame implements Runnable {
     final JFrame frameStartGame = new JFrame();
     JLabel label = new JLabel(levelDisplay);
     JButton start = new JButton("click me to start");
+    JButton settingsButton = new JButton("settings");
+    settingsButton.addActionListener(new ActionListener() {
+
+      public void actionPerformed(ActionEvent e) {
+
+        frameStartGame.setVisible(false);
+        new SettingsSetter().readThenUpdate();
+
+      }
+    });
     start.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         try {
@@ -570,9 +620,9 @@ public class TestGameIdea extends JFrame implements Runnable {
         }
       }
     });
-
+    frameStartGame.add(BorderLayout.SOUTH, settingsButton);
     frameStartGame.add(BorderLayout.EAST, start);
-    frameStartGame.add(label);
+    frameStartGame.add(BorderLayout.CENTER, label);
     frameStartGame.setSize(480, 640);
     frameStartGame.setVisible(true);
   }
@@ -761,10 +811,9 @@ public class TestGameIdea extends JFrame implements Runnable {
   }
 
   private static void store(boolean b) throws IOException, ClassNotFoundException {
-    System.out.println(" store Void working fine");
     String userInput = " ";
     userInput = JOptionPane.showInputDialog("Enter the world name");
-    FILENAME1 = userInput + FILENAME1;
+    FILENAME1 = userName + "/" + userInput + FILENAME1;
     String userInput1 = JOptionPane.showInputDialog("Enter your name");
     InGameName = "Commander " + userInput1;
     try {
@@ -795,9 +844,7 @@ public class TestGameIdea extends JFrame implements Runnable {
     money = myGame1.FINALMONEY;
     level = myGame1.FINALLEVEL;
     weaponLevel = myGame1.FINALWEAPONLEVEL;
-    InGameName = myGame1.username;
-    System.out.println(
-            myGame1.FINALMONEY + " " + myGame1.FINALLEVEL + " " + myGame1.FINALWEAPONLEVEL + " " + myGame1.username);
+    System.out.println(myGame1.FINALMONEY + " " + myGame1.FINALLEVEL + " " + myGame1.FINALWEAPONLEVEL);
     completeStartGame();
   }
 
@@ -807,6 +854,9 @@ public class TestGameIdea extends JFrame implements Runnable {
     String allTheGames = reader.readLine();
     JOptionPane.showMessageDialog(null, allTheGames);
     openWindow();
+  }
+
+  private static void settings() {
   }
 
   static JProgressBar playerHealthPB;
@@ -835,7 +885,6 @@ public class TestGameIdea extends JFrame implements Runnable {
           "field", "fair", "mall", "school", "bank" };
   static boolean end = false;
   transient static boolean saveProgress = false;
-  transient static String username;
   transient static boolean didStoryLine = false;
   transient int monsterXpos, monsterYpos;
   transient static int mobMax = 100;
@@ -896,4 +945,205 @@ public class TestGameIdea extends JFrame implements Runnable {
           { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4 }, //
           { 1, 1, 1, 1, 1, 1, 1, 4, 4, 4, 4, 4, 4, 4, 4 } };//
   transient static int money = 0;
+
+  static class SettingsSetter implements KeyListener {
+    static int forward;
+    static int back;
+    static int left;
+    static int right;
+    static int shoot;
+    static String fileName = "users/" + userName + "/" + FILENAME;
+    volatile static KeyEvent key;
+    volatile static KeyEvent gettingCharactorCode;
+    volatile static boolean keyPressed = false;
+
+    public void keyTyped(KeyEvent e) {
+      // TODO Auto-generated method stub
+
+    }
+
+    public void keyPressed(KeyEvent e) {
+      key = e;
+      keyPressed = true;
+    }
+
+    public void keyReleased(KeyEvent e) {
+      // TODO Auto-generated method stub
+      keyPressed = false;
+    }
+
+    public static void readThenUpdate() {
+      try {
+        FileReader fileReader = new FileReader(fileName);
+        BufferedReader bufferedReader = new BufferedReader(fileReader);
+        String fileText = bufferedReader.readLine();
+        String[] keyBind = fileText.split("/");
+        for (int i = 0; i < 5; i++) {
+          if (i == 0) {
+            forward = Integer.parseInt(keyBind[i]);
+            System.out.println(keyBind[i]);
+          } else if (i == 1) {
+            back = Integer.parseInt(keyBind[i]);
+            System.out.println(keyBind[i]);
+          } else if (i == 2) {
+            right = Integer.parseInt(keyBind[i]);
+            System.out.println(keyBind[i]);
+          } else if (i == 3) {
+            left = Integer.parseInt(keyBind[i]);
+            System.out.println(keyBind[i]);
+          } else if (i == 4) {
+            shoot = Integer.parseInt(keyBind[i]);
+            System.out.println(keyBind[i]);
+          }
+        }
+
+      } catch (Exception e) {
+        // TODO: handle exception
+      }
+      update();
+    }
+
+    private static void update() {
+      try {
+        System.out.println(forward);
+        final JFrame settingsFrame = new JFrame();
+        JPanel mainPanel = new JPanel();
+        JPanel forwardPanel = new JPanel();
+        JPanel backPanel = new JPanel();
+        JPanel rightPanel = new JPanel();
+        JPanel leftPanel = new JPanel();
+        JPanel shootPanel = new JPanel();
+        JButton forwardButton = new JButton(getKeyChoice(forward));
+        JButton backButton = new JButton(getKeyChoice(back));
+        JButton rightButton = new JButton(getKeyChoice(right));
+        JButton leftButton = new JButton(getKeyChoice(left));
+        JButton shootButton = new JButton(getKeyChoice(shoot));
+        mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
+        forwardPanel.setLayout(new BoxLayout(forwardPanel, BoxLayout.X_AXIS));
+        backPanel.setLayout(new BoxLayout(backPanel, BoxLayout.X_AXIS));
+        leftPanel.setLayout(new BoxLayout(leftPanel, BoxLayout.X_AXIS));
+        rightPanel.setLayout(new BoxLayout(rightPanel, BoxLayout.X_AXIS));
+        shootPanel.setLayout(new BoxLayout(shootPanel, BoxLayout.X_AXIS));
+
+        mainPanel.addKeyListener(new SettingsSetter());
+        JLabel forwardLabel = new JLabel("walk front");
+        JLabel backLabel = new JLabel("walk back");
+        JLabel lookRightLabel = new JLabel("look Right");
+        JLabel lookLeftLabel = new JLabel("look Left");
+        JLabel shootLabel = new JLabel("shoot gun");
+        forwardButton.addActionListener(new ActionListener() {
+
+          public void actionPerformed(ActionEvent e) {
+            // TODO Auto-generated method stub
+            while (true) {
+              if (keyPressed) {
+                forward = key.getKeyCode();
+                storeKeyPattern();
+              }
+            }
+          }
+        });
+        backButton.addActionListener(new ActionListener() {
+
+          public void actionPerformed(ActionEvent e) {
+            while (true) {
+              if (keyPressed) {
+                back = key.getKeyCode();
+                storeKeyPattern();
+              }
+            }
+          }
+        });
+        leftButton.addActionListener(new ActionListener() {
+
+          public void actionPerformed(ActionEvent e) {
+            // TODO Auto-generated method stub
+            while (true) {
+              if (keyPressed) {
+                left = key.getKeyCode();
+                storeKeyPattern();
+              }
+            }
+
+          }
+        });
+        rightButton.addActionListener(new ActionListener() {
+
+          public void actionPerformed(ActionEvent e) {
+            // TODO Auto-generated method stub
+            while (true) {
+              if (keyPressed) {
+                right = key.getKeyCode();
+                storeKeyPattern();
+              }
+            }
+
+          }
+        });
+        shootButton.addActionListener(new ActionListener() {
+
+          public void actionPerformed(ActionEvent e) {
+            // TODO Auto-generated method stub
+            while (true) {
+              if (keyPressed) {
+                shoot = key.getKeyCode();
+                storeKeyPattern();
+              }
+            }
+          }
+        });
+        forwardPanel.add(forwardLabel);
+        forwardPanel.add(forwardButton);
+        backPanel.add(backLabel);
+        backPanel.add(backButton);
+        rightPanel.add(lookRightLabel);
+        rightPanel.add(rightButton);
+        leftPanel.add(lookLeftLabel);
+        leftPanel.add(leftButton);
+        shootPanel.add(shootLabel);
+        shootPanel.add(shootButton);
+        mainPanel.add(forwardPanel);
+        mainPanel.add(backPanel);
+        mainPanel.add(rightPanel);
+        mainPanel.add(leftPanel);
+        mainPanel.add(shootPanel);
+        JButton goBackButton = new JButton("back");
+        goBackButton.addActionListener(new ActionListener() {
+
+          public void actionPerformed(ActionEvent e) {
+            // TODO Auto-generated method stub
+            settingsFrame.setVisible(false);
+            startNewGameFirstTime();
+          }
+        });
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        settingsFrame.add(BorderLayout.CENTER, mainPanel);
+        settingsFrame.add(BorderLayout.SOUTH, goBackButton);
+        settingsFrame.setSize(screenSize);
+        settingsFrame.setVisible(true);
+      } catch (Exception e) {
+        // TODO: handle exception
+      }
+    }
+
+    private static void storeKeyPattern() {
+      try {
+        FileWriter fileWriter = new FileWriter(fileName);
+        fileWriter.write(forward + "/" + back + "/" + right + "/" + left + "/" + shoot);
+        fileWriter.close();
+        readThenUpdate();
+      } catch (Exception e) {
+        // TODO: handle exception
+      }
+    }
+
+    private static String getKeyChoice(int keyCode) {
+      return KeyEvent.getKeyText(keyCode);
+    }
+  }
+
+  /**
+   *
+   */
+
 }
